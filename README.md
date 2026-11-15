@@ -1,23 +1,55 @@
-# Proof Notes POC
+# Proof Notes
 
-## Authoring interface and topic filtering
+Proof Notes is a small documentation site for mathematical proofs. An author
+writes a proof in Markdown and marks optional explanations by topic. Readers
+choose topics they already understand, and matching explanations disappear
+while the rest of the page reflows. Definitions and lemmas can also open in
+reference cards beside the proof.
 
-Start the local editor from this directory:
+```text
+Author writes Markdown + topic labels
+                ↓
+MkDocs validates and renders the pages
+                ↓
+Reader views the site and selects known topics
+```
+
+The local editor is a convenient way to edit and preview those Markdown files;
+the files themselves remain the source of truth. The generated site is a
+separate companion to any required LaTeX/PDF submission.
+
+## Start the authoring editor
+
+From the project directory, install the dependencies once:
 
 ```sh
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 npm install
+```
+
+Start the local editor:
+
+```sh
 .venv/bin/python author_server.py
 ```
 
-Open <http://127.0.0.1:8765/>. Select a page and write Markdown. Expand
-**Topics** to add or remove topics, and mark optional explanations directly
-in the Markdown using the notation below. Save explicitly; the preview builds
-from the current unsaved draft. The editor runs locally and is not a public
-server.
+Open <http://127.0.0.1:8765/>. Choose or create a page, write Markdown, and
+use **Topics** to manage the shared topic list. The preview is built from your
+current draft; click **Save** to write changes to the project. Drag the divider
+to resize the panes, or open the preview in a new tab. Stop the server with
+`Ctrl+C`.
 
-For direct Markdown editing, the underlying notation is:
+The editor server is for local authoring, not public hosting. A preview is a
+temporary site built from the draft; it is not the final published site.
+
+## Write a proof
+
+Pages live in `docs/`, and the shared topic list lives in `topics.json`. Use
+Markdown for prose and headings, and LaTeX-style math such as `$x^2$` or a
+`$$` display block. See `docs/chapters/groups.md` for a commutative square.
+
+Wrap optional background in a knowledge block using IDs from the topic list:
 
 ```md
 ::: knowledge tags="algebra,number-theory"
@@ -25,135 +57,64 @@ Optional background written in Markdown and $x^2$ mathematics.
 :::
 ```
 
-The allowed topics live in `topics.json`. Unknown topics fail the build.
-Select **all** of a passage's topics in the reader view to hide it; changing
-the selection restores it. A reader's selections are saved in their browser.
-Untagged content and all content when JavaScript is disabled remain visible.
-Keep essential proof steps outside optional passages. Knowledge blocks can
-occur inside `proof-ref` blocks, but cannot contain another directive block.
+An explanation is hidden only when the reader selects **all** its tags. For
+example, the passage above stays visible if the reader knows algebra but has
+not selected number theory. Unknown tags fail the build. Reader selections
+are stored in that browser; untagged text stays visible, and all text remains
+visible when JavaScript is unavailable. Keep essential proof steps outside
+optional blocks.
 
-Run the filtering check with `node tests/test_knowledge_ui.js` alongside the
-existing verification commands below.
-
-A small, shareable documentation site for mathematical proofs. It uses a clean
-book-like layout: navigation is on the left, the proof stays in the centre, and
-an earlier definition or lemma can be opened in a closeable card on the right.
-The reader does not lose their place in the proof.
-
-For the full project rationale and operating notes, see
-[`explanations/architecture-and-decisions.md`](explanations/architecture-and-decisions.md).
-
-## Run locally
-
-Run these commands from this directory (`proof-docs`):
-
-```sh
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-npm install
-.venv/bin/mkdocs serve
-```
-
-Open <http://127.0.0.1:8000>. Stop the server with `Ctrl+C`.
-
-`npm install` is needed once because the Python KaTeX extension uses the local
-KaTeX command to turn maths into static HTML. If it reports that KaTeX is
-missing, run `npm install katex` and start the server again.
-
-## What a reader sees
-
-- The left menu contains the chapter and its table of contents.
-- A reference such as `Lemma 1.2` opens that lemma in the right-hand column.
-- Clicking the same reference again closes its card. Different references can
-  stay open together.
-- When the reader scrolls past the reference that opened a card, that card
-  closes. `Open full section` is the one deliberate link that takes the reader
-  to the original text.
-- On a narrow screen, cards become a closeable panel along the bottom, because
-  there is not enough space for a useful right column.
-
-## How it is put together
-
-There is a clear boundary between the build and the small amount of browser
-behaviour:
-
-| Part | Job | Why it exists |
-| --- | --- | --- |
-| Markdown in `docs/` | The proof text, headings, and references | Authors can write normal, reviewable text. |
-| Python hook in `plugins/proof_references.py` | Checks references and creates the complete hidden cards at build time | The browser never has to interpret proof Markdown or clone proof content. |
-| CSS in `docs/stylesheets/proof-notes.css` | The book-like layout and responsive right-hand cards | Keeps presentation separate from content. |
-| Small JS file in `docs/javascripts/reference-panel.js` | Opens, closes, and stacks cards | This interaction cannot be done reliably with HTML and CSS alone. |
-
-Math is also rendered during the build, rather than after the page loads. That
-keeps the page usable without a large client-side maths library and makes the
-generated site easy to host anywhere.
-
-## Authoring a local reference
-
-Wrap a section that may be shown as a card in a `proof-ref` block. Then refer
-to its ID where it is needed:
+To make a definition or lemma available as a reference card, give it an ID
+and refer to it elsewhere on the same page:
 
 ```md
 ::: proof-ref id="lemma-even-square"
-## Lemma 1.2: Squaring preserves evenness
+## Lemma: Squaring preserves evenness
 ...
 :::
 
-By [[Lemma 1.2|lemma-even-square]], the claim follows.
+By [[the lemma|lemma-even-square]], the claim follows.
 ```
 
-Authors write no HTML. A typo or missing target stops the build instead of
-silently creating a broken reference. This prototype supports references within
-the current chapter. Cross-chapter previews can be added later with a
-build-time index of all marked sections.
+A missing reference stops the build. References currently work within the
+same page. External sources can use normal Markdown links and footnotes.
+Knowledge blocks may occur inside `proof-ref` blocks, but cannot themselves
+contain another directive block.
 
-External citations remain ordinary Markdown links and footnotes. They should
-take a reader to the original source rather than pretending that the source is
-part of this document.
+## How the pieces fit together
 
-## Choices and trade-offs
+| Part | Responsibility |
+| --- | --- |
+| `docs/*.md` and `docs/chapters/` | The author's pages, including proof text, topic tags, and references. |
+| `topics.json` | Topic IDs and names shared across the site. |
+| `author/` and `author_server.py` | The local editing interface, saving, and temporary previews. |
+| `mkdocs.yml` | Site navigation, theme, Markdown extensions, and build configuration. |
+| `plugins/proof_references.py` | Build-time validation and conversion of knowledge blocks, references, and math. |
+| `docs/javascripts/` | Reader-side topic filtering and reference-card interaction. |
+| `docs/stylesheets/` | Presentation of the generated reader site. |
+| `tests/` | Checks for build errors, references, topic handling, and filtering. |
+| `site/` | Generated website output; rebuild it instead of editing it by hand. |
 
-### Chosen: MkDocs + a Python build hook + small JavaScript
+Python performs validation and generates the pages at build time. JavaScript
+runs in the reader's browser to change which explanations and cards are shown.
+Math is rendered during the build using KaTeX, installed through npm.
 
-This is the simplest option that keeps proof writing in Markdown while still
-allowing interactive local references. Python owns validation and generated
-content; JavaScript only changes the visibility of cards. The trade-off is that
-there is a small JS file, because a closeable, stackable panel needs browser
-state.
-
-### Alternative: plain MkDocs with normal anchors
-
-This would have no custom code and is excellent for a conventional textbook.
-It was not chosen because clicking `Lemma 1.2` would move the reader away from
-the proof they are currently following.
-
-### Alternative: a React/MDX or Next.js site
-
-This could provide richer search, animated panels, cross-chapter previews, and
-more elaborate editing tools. It was not chosen for the prototype because it
-adds a larger toolchain and makes simple proof writing harder than necessary.
-
-### Alternative: all JavaScript in the browser
-
-The browser could scan Markdown-like content and construct cards itself. It was
-not chosen because it mixes authoring, proof parsing, and UI logic in one
-place, makes broken references harder to catch, and risks a flash of unrendered
-maths.
-
-### Alternative: all Python with no JavaScript
-
-Python can generate the page, but it cannot respond to a click in a static page
-after it has been published. This works only if references are ordinary links
-or if a server application is added. A server is unnecessary for this document
-site.
-
-## Verify a change
+## Build and check
 
 ```sh
 .venv/bin/python -m unittest discover -s tests -v
+node tests/test_knowledge_ui.js
+node --check author/editor.js
+node --check author/pane-resize.js
 node --check docs/javascripts/reference-panel.js
-.venv/bin/mkdocs build --strict
+node --check docs/javascripts/knowledge.js
+.venv/bin/python -m mkdocs build --strict
 ```
 
-The generated static site is placed in `site/`. It can be uploaded to any
-static host after a successful build.
+The finished static site is written to `site/` and can be placed on a static
+host. To preview the saved site without the authoring editor, run
+`.venv/bin/python -m mkdocs serve` and open <http://127.0.0.1:8000/>.
+
+The notes in `explanations/architecture-and-decisions.md` describe the earlier
+reference-card prototype and do not yet cover the full authoring and topic
+filtering workflow.
