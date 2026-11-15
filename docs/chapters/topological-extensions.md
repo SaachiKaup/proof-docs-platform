@@ -33,8 +33,8 @@ It turns out that $\alpha$ is not a bijection in general **cite thesis examples*
 
 Let $G$ be a CW group and let $A$ be an abelian topological group with a continuous right $G$-action via group homomorphisms. All points in Milgram--Steenrod constructions are written in semi-normal form (i.e. $0\leq t_1\leq t_2\leq\dots\leq t_n\leq 1$).
 
-::: proof-ref id="homotopy-orbits"
-### Lemma 2.1
+::: proof-ref id="homotopy-orbits" type="lemma"
+\label{hom orb}
 
 There is a natural homeomorphism
 
@@ -74,7 +74,7 @@ $$
 BA\to EE/A \to EG.
 $$
 
-The underlying principal $(G\ltimes BA)$-bundle yields a class $\alpha(\calE)\in [BG, B(G\ltimes BA)]_{BG}$. By [[Lemma 2.1|homotopy-orbits]], this defines a map
+The underlying principal $(G\ltimes BA)$-bundle yields a class $\alpha(\calE)\in [BG, B(G\ltimes BA)]_{BG}$. By \Cref{hom orb}, this defines a map
 
 $$
 \alpha:\E(G;A)\to [BG, (B^2A)_{hG}]_{BG}
@@ -88,8 +88,8 @@ $$
 
 which remembers only the principal $A$-bundle structure underlying an extension.
 
-::: proof-ref id="underlying-bundle"
-### Proposition 3.1
+::: proof-ref id="underlying-bundle" type="proposition"
+\label{bundle str}
 
 $\ker\alpha\subset\ker F$, i.e., $\alpha$ detects the underlying bundle structure of extensions.
 :::
@@ -99,8 +99,8 @@ Let $\calE\in\ker\alpha$. Hence, as a $(G\ltimes BA)$-principal bundle, $EE/A \t
 
 Recall the correspondence $T:\Hc2(G;A)\iso\ker F$, which is the continuous analogue of the classical correspondence between second group cohomology and abelian group extensions for discrete groups. For $f:G^{\wedge2}\to A$ a normalized continuous 2-cocycle, we wish to describe $\alpha T(f)$ explicitly in terms of $f$.
 
-::: proof-ref id="cocycle-formula"
-### Theorem 3.2
+::: proof-ref id="cocycle-formula" type="theorem"
+\label{alpha_2}
 
 The image of $\alpha T(f)$ under the restriction
 
@@ -179,8 +179,8 @@ $$
 It remains to see that [(4)](#eq-bzigzag) commutes up to homotopy. For this, we claim that the principal $(G\ltimes BA)$-bundle corresponding to the two maps $B\tilde G\to B(G\ltimes BA)$ are isomorphic. The $(E\ltimes EA)$-action on $EE$ factors through a free $\tilde G$-action, and the composite projection
 $EE\to BE\to BG$ induces a homeomorphism $EE/\tilde G\cong BG$, i.e., $EE\to BG$ is a universal $\tilde G$-bundle. $B\pi$ pulls this back to the Milgram--Steenrod model:
 
-::: proof-ref id="lift-lemma"
-### Lemma 3.3
+::: proof-ref id="lift-lemma" type="lemma"
+\label{shriek lemma}
 
 $B\pi$ lifts to a $\tilde G$-equivariant map $\Pi:E\tilde G\to EE$, i.e., there is a pull-back square
 <span id="eq-shriek-eq"></span>
@@ -213,9 +213,7 @@ B\tilde G \arrow[r, "B\pi"]                  & BG
 
 of principal $(G\ltimes BA)$-bundles. These principal bundles are $(B\kappa)^\ast E(G\ltimes BA)$ and $\alpha(\calE)^\ast E(G\ltimes BA)$ respectively, so the commutativity of [(4)](#eq-bzigzag) follows.
 
-### Proof of Lemma 3.3
-
-**Proof of [[Lemma 3.3|lift-lemma]].**
+**Proof of \Cref{shriek lemma}.**
 Treating [(5)](#eq-tilde-g) as an identification, the formula for $\Pi$ is
 <span id="eq-pi"></span>
 
@@ -238,9 +236,7 @@ $$
 
 Commutativity of [(7)](#eq-shriek-eq) is clear.
 
-### Proof of Theorem 3.2
-
-**Proof of [[Theorem 3.2|cocycle-formula]].**
+**Proof of \Cref{alpha_2}.**
 In light of [(4)](#eq-bzigzag), it suffices to show that $B\kappa|_{B_2\tilde G}$ is homotopic to $\Phi_f\circ B\pi|_{B_2\tilde G}$. Treating [(5)](#eq-tilde-g) as an identification, we have
 
 $$
@@ -268,8 +264,8 @@ where $\vec{g}\,'=(1_G,g_1g_2)$, $\vec{z}\,'=(0_{BA},z_1\cdot g_2+z_2-(f(g_1,g_2
 
 Which classes in $[BG,(B^2A)_{hG}]_{BG}$ come from an abelian group extension, i.e., what is the image of $\alpha$? This is a hard question to answer for a general pair $(G,A)$, but it turns out that $\alpha$ is surjective in a coarser sense when $G$ acts trivially on $A$:
 
-::: proof-ref id="essential-surjectivity"
-### Theorem 4.1
+::: proof-ref id="essential-surjectivity" type="theorem"
+\label{essential-surjectivity}
 
 There exist CW groups $G'$ and $A'$ which are weakly equivalent to $G$ and $A$ respectively (as spaces) such that $\alpha:\E(G';A')\to H^2(BG';A')$ is surjective.
 :::
@@ -311,7 +307,7 @@ Since
 ## Draft points to review
 
 - The source requests a citation for examples where $\alpha$ is not a bijection.
-- The proof of Proposition 3.1 ends with $\ker T$, while its statement uses $\ker F$; check the intended notation.
+- The proof of \Cref{bundle str} ends with $\ker T$, while its statement uses $\ker F$; check the intended notation.
 - The displayed formulas for $\Phi_f$, $R$, and $H_s$ contain unbalanced parentheses; compare the original source before correcting them.
 - The source says well-definedness checks remain for $H_s$, including $t_1=t_2$.
 - The final diagram labels both vertical arrows “which way”; the highlighted simplicial claims and final argument require review.

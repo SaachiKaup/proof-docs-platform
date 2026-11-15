@@ -11,11 +11,14 @@ from mkdocs.exceptions import PluginError
 
 
 BLOCK = re.compile(
-    r'^:::\s*proof-ref\s+id="(?P<id>[a-z][a-z0-9-]*)"\s*\n'
+    r'^:::\s*proof-ref\s+id="(?P<id>[a-z][a-z0-9-]*)"(?:\s+type="(?P<type>lemma|theorem|proposition)")?\s*\n'
     r'(?P<content>.*?)^:::\s*$',
     re.MULTILINE | re.DOTALL,
 )
 REFERENCE = re.compile(r"\[\[(?P<label>[^\]|]+)\|(?P<id>[a-z][a-z0-9-]*)\]\]")
+LATEX_LABEL = re.compile(r"\\label\{([^{}]+)\}")
+LATEX_REFERENCE = re.compile(r"\\(?P<command>Cref|cref)\{(?P<label>[^{}]+)\}")
+SECTION = re.compile(r"^##\s+(\d+)\.", re.MULTILINE)
 INLINE_MATH = re.compile(r"(?<!\\$)\$(?!\$)(.+?)(?<!\\)\$(?!\$)")
 DISPLAY_MATH = re.compile(r"^\$\$\s*\n?(.*?)\n?\$\$$", re.MULTILINE | re.DOTALL)
 
@@ -27,12 +30,32 @@ def _math_for_static_katex(markdown: str) -> str:
 
 def on_page_markdown(markdown, *, page, config, files):
     identifiers = {match.group("id") for match in BLOCK.finditer(markdown)}
+    labels = {}
+    numbers = {}
+    for match in BLOCK.finditer(markdown):
+        kind = match.group("type")
+        if not kind:
+            continue
+        section = list(SECTION.finditer(markdown, 0, match.start()))
+        if not section:
+            raise PluginError(f"{page.file.src_uri}: typed proof-ref requires a numbered section")
+        section_number = section[-1].group(1)
+        numbers[section_number] = numbers.get(section_number, 0) + 1
+        label_matches = LATEX_LABEL.findall(match.group("content"))
+        if len(label_matches) != 1 or label_matches[0] in labels:
+            raise PluginError(f"{page.file.src_uri}: typed proof-ref must have one unique LaTeX label")
+        labels[label_matches[0]] = (match.group("id"), kind, f"{section_number}.{numbers[section_number]}")
 
     def section(match):
         identifier = match.group("id")
+        content = match.group("content").strip()
+        if match.group("type"):
+            label = LATEX_LABEL.search(content).group(1)
+            _, kind, number = labels[label]
+            content = f"### {kind.capitalize()} {number}\n\n" + LATEX_LABEL.sub("", content, count=1).strip()
         return (
             f'<section class="reference-source" id="{identifier}" markdown="1">\n\n'
-            f'{match.group("content").strip()}\n\n</section>'
+            f'{content}\n\n</section>'
         )
 
     markdown = BLOCK.sub(section, markdown)
@@ -46,7 +69,16 @@ def on_page_markdown(markdown, *, page, config, files):
             f'data-reference-id="{identifier}">{escape(match.group("label"))}</button>'
         )
 
-    return _math_for_static_katex(REFERENCE.sub(trigger, markdown))
+    def latex_trigger(match):
+        label = match.group("label")
+        if label not in labels:
+            raise PluginError(f"{page.file.src_uri}: LaTeX reference '{label}' has no typed proof-ref on this page")
+        identifier, kind, number = labels[label]
+        name = kind.capitalize() if match.group("command") == "Cref" else kind
+        return (f'<button class="reference-trigger" type="button" data-reference-id="{identifier}">'
+                f'{escape(name)} {number}</button>')
+
+    return _math_for_static_katex(LATEX_REFERENCE.sub(latex_trigger, REFERENCE.sub(trigger, markdown)))
 
 
 def on_post_page(output, *, page, config):
