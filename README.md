@@ -62,7 +62,7 @@ last saved version. Both are available only while the editor server is running.
 From the project directory, write a new Markdown page with:
 
 ```sh
-.venv/bin/python import_tex.py ../inverted.tex -o docs/chapters/imported-proof.md
+.venv/bin/python import_tex.py paper.tex -o docs/chapters/imported-paper.md
 ```
 
 The importer never changes the TeX file or overwrites an existing output.
@@ -103,11 +103,8 @@ features with Verso is a future direction.
 
 Pages live in `docs/`, and the shared topic list lives in `topics.json`. Use
 Markdown for prose and headings, and LaTeX-style math such as `$x^2$` or a
-`$$` display block. See `docs/chapters/groups.md` for a commutative square.
-The imported topological-extensions draft uses the `group-cohomology` topic;
-add that ID to the topic list if setting up the project with a new catalog.
-Its Markdown is an adapted copy, not automatically synchronized with the
-original `inverted.tex`.
+`$$` display block. A TeX import creates a separate Markdown page; changes to
+either file are not automatically synchronized with the other.
 
 Wrap optional background in a knowledge block using IDs from the topic list:
 
@@ -158,9 +155,8 @@ The card expands in place; it does not navigate away from the reader's position.
 
 ## How the pieces fit together
 
-The topological-extensions page also demonstrates a limited LaTeX-style
-reference syntax. Within a manually numbered `## 2. ...` section, a typed
-block such as `::: proof-ref id="example" type="lemma"` can contain
+For LaTeX-style references, a typed block such as
+`::: proof-ref id="example" type="lemma"` can contain
 `\label{original label}`. Elsewhere on the same page, `\Cref{original label}`
 opens its reference card. Typed lemmas, theorems and propositions share a
 counter that resets at each numbered section; their headings and references
