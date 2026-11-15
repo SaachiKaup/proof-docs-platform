@@ -107,3 +107,6 @@
 @media (max-width: 760px) {
   .md-typeset { font-size: 1rem; }
 }
+.knowledge-selector { display: flex; flex-wrap: wrap; gap: .7rem 1rem; align-items: center; padding: .8rem; margin-bottom: 1.2rem; border: 1px solid #ddd; border-radius: .35rem; }
+.knowledge-selector[hidden], .knowledge-block[hidden] { display: none !important; }
+.knowledge-selector label { white-space: nowrap; }
