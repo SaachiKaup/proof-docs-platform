@@ -31,7 +31,7 @@ npm install
 Start the local editor:
 
 ```sh
-.venv/bin/python author_server.py
+.venv/bin/python author/server.py
 ```
 
 Open <http://127.0.0.1:8765/>. Choose or create a page, write Markdown, and
@@ -87,9 +87,10 @@ contain another directive block.
 | --- | --- |
 | `docs/*.md` and `docs/chapters/` | The author's pages, including proof text, topic tags, and references. |
 | `topics.json` | Topic IDs and names shared across the site. |
-| `author/` and `author_server.py` | The local editing interface, saving, and temporary previews. |
+| `author/` | The local editing interface, server, saving, and temporary previews. |
 | `mkdocs.yml` | Site navigation, theme, Markdown extensions, and build configuration. |
-| `plugins/proof_references.py` | Build-time validation and conversion of knowledge blocks, references, and math. |
+| `plugins/knowledge.py` | Validates topic tags and builds the reader's topic selector. |
+| `plugins/proof_references.py` | Builds reference cards and prepares math for KaTeX. |
 | `docs/javascripts/` | Reader-side topic filtering and reference-card interaction. |
 | `docs/stylesheets/` | Presentation of the generated reader site. |
 | `tests/` | Checks for build errors, references, topic handling, and filtering. |
