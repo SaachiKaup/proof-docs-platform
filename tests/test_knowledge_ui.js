@@ -19,7 +19,7 @@ const document = {
 };
 const window = {addEventListener(name, fn) { windowListeners[name] = fn; }};
 const localStorage = {getItem(key) { return storage[key] || null; }, setItem(key, value) { storage[key] = value; }};
-vm.runInNewContext(fs.readFileSync("docs/javascripts/knowledge.js", "utf8"), {document, window, localStorage, location: {hash: ""}, Set, JSON});
+vm.runInNewContext(fs.readFileSync("docs/javascripts/topic-switch.js", "utf8"), {document, window, localStorage, location: {hash: ""}, Set, JSON});
 listeners.DOMContentLoaded();
 assert.equal(selector.hidden, false);
 assert.equal(single.hidden, false); assert.equal(multi.hidden, false);

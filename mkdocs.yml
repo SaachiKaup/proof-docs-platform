@@ -31,7 +31,7 @@ extra_css:
 - stylesheets/proof-notes.css
 extra_javascript:
 - javascripts/reference-panel.js
-- javascripts/knowledge.js
+- javascripts/topic-switch.js
 hooks:
 - plugins/knowledge.py
 - plugins/proof_references.py
