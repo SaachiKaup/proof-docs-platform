@@ -44,6 +44,8 @@ $$
 
 :::
 
+<div class="proof-details" data-reference-id="homotopy-orbits" markdown="1">
+
 **Proof.** 
 Let $p:G\ltimes A\to G$ be the projection and consider the map $\phi:E(G\ltimes A)\to EA$ given by the formula
 <span id="eq-e-semi-dir"></span>
@@ -53,6 +55,9 @@ $$
 $$
 
 One checks that $\phi$ is well-defined and $(G\ltimes A)$-equivariant. Hence, $Ep\times \phi:E(G\ltimes A)\to EG\times EA$ is also $(G\ltimes A)$-equivariant, and has a continuous inverse. Taking the quotient by the $(G\ltimes A)$-action yields the desired homeomorphism.
+
+
+</div>
 
 Henceforth, we will treat the above homeomorphisms $B(G\ltimes A)\cong (BA)_{hG}$ and $E(G\ltimes A)\cong EG\times EA$ as identifications. Note that $(BA)_{hG}\to BG$ is a group bundle with fiber group $BA$; fiber-wise multiplication and inversion are descended from the trivial group bundle $EG\times EA\to EG$ with fiber group $EA$.
 
@@ -94,8 +99,13 @@ which remembers only the principal $A$-bundle structure underlying an extension.
 $\ker\alpha\subset\ker F$, i.e., $\alpha$ detects the underlying bundle structure of extensions.
 :::
 
+<div class="proof-details" data-reference-id="underlying-bundle" markdown="1">
+
 **Proof.** 
 Let $\calE\in\ker\alpha$. Hence, as a $(G\ltimes BA)$-principal bundle, $EE/A \to BG$ is the push-forward of the universal $G$-bundle along the projection $G\ltimes BA\to G$. Hence, the inclusion $\iota:G\inc G\ltimes BA\inc EE/A$ factors through $EG\inc EE/A$. Since $EG$ is contractible, this shows that $\iota$ is null-homotopic. However, the pull-back of the principal $A$-bundle $EE\to EE/A$ along $\iota$ is $F(\calE)$,[^extension-pullback] so $\calE\in\ker T$.
+
+
+</div>
 
 Recall the correspondence $T:\Hc2(G;A)\iso\ker F$, which is the continuous analogue of the classical correspondence between second group cohomology and abelian group extensions for discrete groups. For $f:G^{\wedge2}\to A$ a normalized continuous 2-cocycle, we wish to describe $\alpha T(f)$ explicitly in terms of $f$.
 
@@ -120,7 +130,7 @@ Let $\calE=T(f)$. For the proof of the theorem, we construct a zigzag of continu
 <span id="eq-zigzag"></span>
 
 <figure class="tikz-diagram">
-<script type="text/tikz">
+<script type="text/tikz" data-tex-packages='{"tikz-cd":"","amssymb":""}'>
 \def\calE{\mathcal{E}}
 \begin{tikzcd}
 G & \tilde G \arrow[l, "\pi"'] \arrow[r, "\kappa"] & G\ltimes BA
@@ -133,7 +143,7 @@ such that the first arrow is a homotopy equivalence and
 <span id="eq-bzigzag"></span>
 
 <figure class="tikz-diagram">
-<script type="text/tikz">
+<script type="text/tikz" data-tex-packages='{"tikz-cd":"","amssymb":""}'>
 \def\calE{\mathcal{E}}
 \begin{tikzcd}
 BG \arrow[rr, "\alpha(\calE)", bend left] & B\tilde G \arrow[r,"B\kappa"] \arrow[l,"B\pi"'] & B(G\ltimes BA)
@@ -186,7 +196,7 @@ $B\pi$ lifts to a $\tilde G$-equivariant map $\Pi:E\tilde G\to EE$, i.e., there 
 <span id="eq-shriek-eq"></span>
 
 <figure class="tikz-diagram">
-<script type="text/tikz">
+<script type="text/tikz" data-tex-packages='{"tikz-cd":"","amssymb":""}'>
 \def\calE{\mathcal{E}}
 \begin{tikzcd}
 E\tilde G \arrow[d] \arrow[r, "\Pi", dashed] & EE \arrow[d] \\
@@ -201,7 +211,7 @@ B\tilde G \arrow[r, "B\pi"]                  & BG
 Factoring out the $A''$ action in [(7)](#eq-shriek-eq) yields a pull-back square
 
 <figure class="tikz-diagram">
-<script type="text/tikz">
+<script type="text/tikz" data-tex-packages='{"tikz-cd":"","amssymb":""}'>
 \def\calE{\mathcal{E}}
 \begin{tikzcd}
 E\tilde G/A'' \arrow[d] \arrow[r] & EE/A \arrow[d] \\
@@ -212,6 +222,8 @@ B\tilde G \arrow[r, "B\pi"]                  & BG
 </figure>
 
 of principal $(G\ltimes BA)$-bundles. These principal bundles are $(B\kappa)^\ast E(G\ltimes BA)$ and $\alpha(\calE)^\ast E(G\ltimes BA)$ respectively, so the commutativity of [(4)](#eq-bzigzag) follows.
+
+<div class="proof-details" data-reference-id="lift-lemma" markdown="1">
 
 **Proof of \Cref{shriek lemma}.**
 Treating [(5)](#eq-tilde-g) as an identification, the formula for $\Pi$ is
@@ -235,6 +247,11 @@ $$
 $$
 
 Commutativity of [(7)](#eq-shriek-eq) is clear.
+
+
+</div>
+
+<div class="proof-details" data-reference-id="cocycle-formula" markdown="1">
 
 **Proof of \Cref{alpha_2}.**
 In light of [(4)](#eq-bzigzag), it suffices to show that $B\kappa|_{B_2\tilde G}$ is homotopic to $\Phi_f\circ B\pi|_{B_2\tilde G}$. Treating [(5)](#eq-tilde-g) as an identification, we have
@@ -260,6 +277,9 @@ $$
 
 where $\vec{g}\,'=(1_G,g_1g_2)$, $\vec{z}\,'=(0_{BA},z_1\cdot g_2+z_2-(f(g_1,g_2),1))$, and $\vec{t}\,'=(0,t)$. This is easy to see.
 
+
+</div>
+
 ## 4. Essential surjectivity of α
 
 Which classes in $[BG,(B^2A)_{hG}]_{BG}$ come from an abelian group extension, i.e., what is the image of $\alpha$? This is a hard question to answer for a general pair $(G,A)$, but it turns out that $\alpha$ is surjective in a coarser sense when $G$ acts trivially on $A$:
@@ -269,6 +289,8 @@ Which classes in $[BG,(B^2A)_{hG}]_{BG}$ come from an abelian group extension, i
 
 There exist CW groups $G'$ and $A'$ which are weakly equivalent to $G$ and $A$ respectively (as spaces) such that $\alpha:\E(G';A')\to H^2(BG';A')$ is surjective.
 :::
+
+<div class="proof-details" data-reference-id="essential-surjectivity" markdown="1">
 
 **Proof.** 
 Write $\mathbb{G}:\mathbf{sSet}_0\to \mathbf{sGrp}$ for Kan's loop-group functor and $\bar W:\mathbf{sGrp}\to\mathbf{sSet}_0$ for its right-adjoint. Let $X\in\mathbf{sSet}_0$ be the based singular complex on $BG$ and let $\mathcal{A}\in\mathbf{sAb}$ be the singular complex on $A$. **Note that $\bar W$ takes $\mathbf{sAb}$ to $\mathbf{sAb}$**, so $\bar W^2\mathcal{A}$ makes sense. Also, we know that
@@ -292,7 +314,7 @@ $$
 Since
 
 <figure class="tikz-diagram">
-<script type="text/tikz">
+<script type="text/tikz" data-tex-packages='{"tikz-cd":"","amssymb":""}'>
 \def\calE{\mathcal{E}}
 \begin{tikzcd}
 \Omega|X| \arrow[d,"which way"] \arrow[r, "\Omega|f|"] & \Omega|\bar W^2\mathcal{A}| \arrow[d,"which way"] \\
@@ -303,6 +325,9 @@ Since
 </figure>
 
 **commutes up to homotopy, it follows that taking $G'=|\mathbb{G}X|$ and $A'=|\mathcal{A}|$ works.**
+
+
+</div>
 
 ## Draft points to review
 

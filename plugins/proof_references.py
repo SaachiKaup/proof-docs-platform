@@ -75,8 +75,8 @@ def on_page_markdown(markdown, *, page, config, files):
             raise PluginError(f"{page.file.src_uri}: LaTeX reference '{label}' has no typed proof-ref on this page")
         identifier, kind, number = labels[label]
         name = kind.capitalize() if match.group("command") == "Cref" else kind
-        return (f'<button class="reference-trigger" type="button" data-reference-id="{identifier}">'
-                f'{escape(name)} {number}</button>')
+        return (f'<button class="reference-trigger" type="button" data-reference-id="{identifier}" '
+                f'aria-label="{escape(name)} {number}">{number}</button>')
 
     return _math_for_static_katex(LATEX_REFERENCE.sub(latex_trigger, REFERENCE.sub(trigger, markdown)))
 
@@ -115,12 +115,32 @@ def on_post_page(output, *, page, config):
         content["class"] = ["reference-card__content"]
         for element in content.select("[id]"):
             element.attrs.pop("id", None)
+
+        extra = []
+        children = list(content.children)
+        for index, child in enumerate(children):
+            if getattr(child, "name", None) == "p":
+                bold = child.find("strong", recursive=False)
+                if bold and bold.get_text(strip=True).lower().startswith("proof"):
+                    extra.extend(part.extract() for part in children[index:])
+                    break
+        for detail in article.select(".proof-details[data-reference-id]"):
+            if detail.get("data-reference-id") == identifier:
+                clone = deepcopy(detail)
+                for element in clone.select("[id]"):
+                    element.attrs.pop("id", None)
+                extra.append(clone)
         card.append(content)
 
-        full_section = soup.new_tag("a", href=f"#{identifier}")
-        full_section["class"] = ["reference-card__source"]
-        full_section.string = "Open full section"
-        card.append(full_section)
+        if extra:
+            disclosure = soup.new_tag("details")
+            disclosure["class"] = ["reference-card__details"]
+            summary = soup.new_tag("summary")
+            summary.string = "Open full section"
+            disclosure.append(summary)
+            for part in extra:
+                disclosure.append(part)
+            card.append(disclosure)
         article.append(card)
 
     return str(soup)

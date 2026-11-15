@@ -28,7 +28,8 @@ class ImportedProofTests(unittest.TestCase):
         self.assertIn(r'\arrow[r, "\Pi", dashed]', self.text)
         self.assertIn(r'\arrow[rr, "\alpha(\calE)", bend left]', self.text)
         self.assertIn("which way", self.text)
-        self.assertEqual(self.text.count('<script type="text/tikz">'), 5)
+        self.assertEqual(self.text.count('<script type="text/tikz"'), 5)
+        self.assertEqual(self.text.count('data-tex-packages=\'{"tikz-cd":"","amssymb":""}\''), 5)
 
     def test_topic_and_reference_wrappers_work_together(self):
         knowledge = load_hook("topic_checker")

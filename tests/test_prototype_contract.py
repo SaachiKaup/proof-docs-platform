@@ -55,12 +55,12 @@ By \\Cref{second_lemma} and \\cref{first theorem}.
 '''
         rendered = proof_references.on_page_markdown(text, page=PAGE, config={}, files=[])
         self.assertIn('### Lemma 2.2', rendered)
-        self.assertIn('data-reference-id="second">Lemma 2.2</button>', rendered)
-        self.assertIn('data-reference-id="first">theorem 2.1</button>', rendered)
+        self.assertIn('data-reference-id="second" aria-label="Lemma 2.2">2.2</button>', rendered)
+        self.assertIn('data-reference-id="first" aria-label="theorem 2.1">2.1</button>', rendered)
         earlier = '::: proof-ref id="new" type="proposition"\n\\label{new}\nNew statement.\n:::\n\n'
         changed = proof_references.on_page_markdown(text.replace('::: proof-ref id="second"', earlier + '::: proof-ref id="second"'), page=PAGE, config={}, files=[])
         self.assertIn('### Lemma 2.3', changed)
-        self.assertIn('data-reference-id="second">Lemma 2.3</button>', changed)
+        self.assertIn('data-reference-id="second" aria-label="Lemma 2.3">2.3</button>', changed)
 
     def test_missing_latex_reference_is_a_build_error(self):
         with self.assertRaises(PluginError):
@@ -86,8 +86,8 @@ Second statement.
         result = proof_references.on_page_markdown(text, page=PAGE, config={}, files=[])
         self.assertIn('### Theorem 1.1', result)
         self.assertIn('### Lemma 2.1', result)
-        self.assertIn('data-reference-id="later">Lemma 2.1</button>', result)
-        self.assertIn('data-reference-id="later">lemma 2.1</button>', result)
+        self.assertIn('data-reference-id="later" aria-label="Lemma 2.1">2.1</button>', result)
+        self.assertIn('data-reference-id="later" aria-label="lemma 2.1">2.1</button>', result)
         self.assertNotIn(r'\label{later label}', result)
 
     def test_invalid_latex_reference_targets_are_reported(self):
@@ -117,10 +117,11 @@ See \\Cref{lemma key}.
         soup = BeautifulSoup(proof_references.on_post_page(page, page=PAGE, config={}), 'html.parser')
         button = soup.select_one('button.reference-trigger')
         card = soup.select_one('aside.reference-card')
-        self.assertEqual(button.get_text(strip=True), 'Lemma 1.1')
+        self.assertEqual(button.get_text(strip=True), '1.1')
+        self.assertEqual(button['aria-label'], 'Lemma 1.1')
         self.assertEqual(button['data-reference-id'], card['data-reference-id'])
         self.assertIn('The original mathematical statement.', card.get_text())
-        self.assertEqual(card.select_one('a.reference-card__source')['href'], '#important-lemma')
+        self.assertIsNone(card.select_one('a.reference-card__source'))
 
     def test_plain_display_math_is_prepared_for_rendering(self):
         text = '$$\nA \\xrightarrow{f} B\n$$'
@@ -137,14 +138,32 @@ See \\Cref{lemma key}.
         self.assertNotIn("addEventListener(\"click\", () => open", SCRIPT)
         self.assertIn("closeWhenTriggerLeavesViewport", SCRIPT)
 
-    def test_build_hook_emits_complete_card_without_a_subtitle(self):
+    def test_build_hook_expands_proof_inside_card(self):
         page_html = '''<article class="md-content__inner">
-        <section class="reference-source" id="lemma-even-square"><h2 id="lemma">Lemma 1.2</h2><p>Proof text.</p></section>
+        <section class="reference-source" id="lemma-even-square"><h2 id="lemma">Lemma 1.2</h2><p>Statement.</p><p><strong>Proof.</strong> Proof text.</p></section>
         </article>'''
         rendered = proof_references.on_post_page(page_html, page=PAGE, config={})
-        self.assertIn('data-reference-id="lemma-even-square"', rendered)
-        self.assertIn('href="#lemma-even-square">Open full section</a>', rendered)
-        self.assertNotIn("Earlier section", rendered)
+        soup = BeautifulSoup(rendered, 'html.parser')
+        card = soup.select_one('.reference-card')
+        self.assertIn('Statement.', card.select_one('.reference-card__content').get_text())
+        self.assertNotIn('Proof text.', card.select_one('.reference-card__content').get_text())
+        self.assertIn('Proof text.', card.select_one('details').get_text())
+        self.assertEqual(card.select_one('summary').get_text(), 'Open full section')
+        self.assertFalse(card.select_one('details').has_attr('open'))
+        self.assertIsNone(card.select_one('a[href="#lemma-even-square"]'))
+
+    def test_build_hook_attaches_only_matching_separate_proof(self):
+        page_html = '''<article class="md-content__inner">
+        <section class="reference-source" id="lemma"><h2>Lemma</h2><p>Statement.</p></section>
+        <div class="proof-details" data-reference-id="lemma"><p id="original-proof">The proof.</p></div>
+        <div class="proof-details" data-reference-id="other"><p>Unrelated proof.</p></div>
+        </article>'''
+        soup = BeautifulSoup(proof_references.on_post_page(page_html, page=PAGE, config={}), 'html.parser')
+        card = soup.select_one('.reference-card')
+        self.assertIn('The proof.', card.select_one('details').get_text())
+        self.assertNotIn('Unrelated proof.', card.get_text())
+        self.assertIsNone(card.select_one('#original-proof'))
+        self.assertIsNotNone(soup.select_one('#original-proof'))
 
     def test_static_katex_and_left_toc_are_configured(self):
         self.assertIn("markdown_katex", CONFIG)
@@ -159,6 +178,13 @@ See \\Cref{lemma key}.
         katex = next(item["markdown_katex"] for item in config["markdown_extensions"]
                      if isinstance(item, dict) and "markdown_katex" in item)
         self.assertFalse(katex["insert_fonts_css"])
+
+    def test_tikzjax_uses_matched_fork_assets_without_symbol_patches(self):
+        config = yaml.safe_load(CONFIG)
+        base = 'https://cdn.jsdelivr.net/npm/@rod2ik/tikzjax@1.6.0/dist/'
+        self.assertIn(base + 'fonts.min.css', config['extra_css'])
+        self.assertIn(base + 'tikzjax.min.js', config['extra_javascript'])
+        self.assertNotIn('javascripts/tikz-slashes.js', config['extra_javascript'])
 
 
 if __name__ == "__main__":

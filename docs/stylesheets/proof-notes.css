@@ -86,7 +86,11 @@
 .reference-card__content h2, .reference-card__content h3 { font-size: 1.1rem; line-height: 1.25; margin: 0 1.8rem 0.55rem 0; }
 .reference-card__content .headerlink { display: none; }
 .reference-card__content .katex-display { font-size: 0.86em; }
-.reference-card__source { color: var(--proof-muted); display: inline-block; font: 0.78rem system-ui, sans-serif; margin-top: 0.65rem; }
+.reference-card__details { color: var(--proof-ink); font-family: Georgia, "Times New Roman", serif; font-size: 0.9rem; line-height: 1.5; }
+.reference-card__details summary { color: var(--proof-muted); cursor: pointer; font: 0.78rem system-ui, sans-serif; margin-top: 0.65rem; }
+/* KaTeX positions equation numbers over the formula in narrow cards. */
+.reference-card .katex-display .katex-html { display: flex; width: max-content; min-width: 100%; align-items: baseline; justify-content: center; }
+.reference-card .katex-display > .katex > .katex-html > .katex-tag { position: static; margin-left: 1em; }
 
 @media (min-width: 1220px) {
   .md-main__inner.md-grid { max-width: 88rem; }
