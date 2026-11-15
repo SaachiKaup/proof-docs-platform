@@ -57,6 +57,10 @@ last saved version. Both are available only while the editor server is running.
 Pages live in `docs/`, and the shared topic list lives in `topics.json`. Use
 Markdown for prose and headings, and LaTeX-style math such as `$x^2$` or a
 `$$` display block. See `docs/chapters/groups.md` for a commutative square.
+The imported topological-extensions draft uses the `group-cohomology` topic;
+add that ID to the topic list if setting up the project with a new catalog.
+Its Markdown is an adapted copy, not automatically synchronized with the
+original `inverted.tex`.
 
 Wrap optional background in a knowledge block using IDs from the topic list:
 
@@ -108,6 +112,22 @@ contain another directive block.
 Python performs validation and generates the pages at build time. JavaScript
 runs in the reader's browser to change which explanations and cards are shown.
 Math is rendered during the build using KaTeX, installed through npm.
+
+### LaTeX macros and TikZ diagrams
+
+Define shared KaTeX math macros in `docs/tex-macros.txt`, one per line, for
+example `\E:\mathbb{E}` or `\Hgp:H_{\text{gp}}^{#1}`. These definitions
+apply to every page. They are maintained separately from the original TeX
+preamble: changing the `.tex` file does not update them automatically.
+KaTeX supports a subset of LaTeX, so check each macro when adding it.
+
+For a TikZ diagram, wrap its original code in a
+`<script type="text/tikz">` element, as in the topological extensions page.
+TikZJax renders it in the reader's browser; the browser needs JavaScript and
+network access to TikZJax's assets. Add a text description beside each diagram
+so its meaning remains available when the diagram cannot be displayed. Any
+custom commands used in a diagram also need definitions inside its TikZ wrapper;
+the KaTeX macro file does not supply definitions to TikZJax.
 
 ## Build and check
 

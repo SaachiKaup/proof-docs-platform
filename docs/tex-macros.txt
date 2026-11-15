@@ -1,0 +1,7 @@
+\E:\mathbb{E}
+\calE:\mathcal{E}
+\Hgp:H_{\text{gp}}^{#1}
+\Hc:H_{\text{c}}^{#1}
+\Bun:\operatorname{Bun}
+\inc:\xhookrightarrow{}
+\iso:\xrightarrow{\sim}

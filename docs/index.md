@@ -4,6 +4,9 @@ This is a small proof-of-concept for mathematical notes that preserve a reader's
 
 Internal references open beside the proof. External sources remain ordinary links.
 
+The [topological group extensions](chapters/topological-extensions.md) page
+organizes the working draft from `inverted.tex`, including its open questions.
+
 ## What to try
 
 1. Open **Theorem 1.3**.

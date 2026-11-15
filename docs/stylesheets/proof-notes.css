@@ -29,6 +29,8 @@
 .md-typeset a { color: inherit; text-decoration-color: var(--proof-accent); text-underline-offset: 0.16em; }
 .md-typeset a:hover { color: var(--proof-accent); }
 .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.6rem 0; }
+.tikz-diagram { overflow-x: auto; margin: 1.5rem 0; }
+.tikz-diagram figcaption { margin-top: .5rem; color: var(--proof-muted); font-size: .85em; }
 
 .reference-trigger {
   appearance: none;

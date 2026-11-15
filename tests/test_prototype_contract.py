@@ -1,9 +1,11 @@
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from types import SimpleNamespace
+import json
 import unittest
 
 from mkdocs.exceptions import PluginError
+import yaml
 
 
 ROOT = Path(__file__).parents[1]
@@ -62,6 +64,15 @@ class ProofReferenceTests(unittest.TestCase):
         self.assertIn("markdown_katex", CONFIG)
         self.assertIn("toc.integrate", CONFIG)
         self.assertNotIn("katex.min.js", CONFIG)
+
+    def test_katex_stylesheet_matches_renderer_version(self):
+        config = yaml.safe_load(CONFIG)
+        package = json.loads((ROOT / "package.json").read_text())
+        version = package["devDependencies"]["katex"]
+        self.assertIn(f"https://cdn.jsdelivr.net/npm/katex@{version}/dist/katex.min.css", config["extra_css"])
+        katex = next(item["markdown_katex"] for item in config["markdown_extensions"]
+                     if isinstance(item, dict) and "markdown_katex" in item)
+        self.assertFalse(katex["insert_fonts_css"])
 
 
 if __name__ == "__main__":
