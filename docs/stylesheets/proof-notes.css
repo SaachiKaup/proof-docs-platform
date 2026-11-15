@@ -114,5 +114,6 @@
   .md-typeset { font-size: 1rem; }
 }
 .knowledge-selector { display: flex; flex-wrap: wrap; gap: .7rem 1rem; align-items: center; padding: .8rem; margin-bottom: 1.2rem; border: 1px solid #ddd; border-radius: .35rem; }
-.knowledge-selector[hidden], .knowledge-block[hidden] { display: none !important; }
+.knowledge-selector[hidden], .knowledge-content[hidden], .knowledge-reveal[hidden] { display: none !important; }
 .knowledge-selector label { white-space: nowrap; }
+.knowledge-reveal { background: none; border: 0; color: var(--proof-muted); cursor: pointer; font: inherit; font-size: .82rem; padding: 0; text-decoration: underline; text-underline-offset: .15em; }

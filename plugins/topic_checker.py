@@ -39,7 +39,9 @@ def on_page_markdown(markdown, *, page, config, files):
         if re.search(r'^:::\s*(?:knowledge|proof-ref)\b', match.group("content"), re.MULTILINE):
             raise PluginError(f"{page.file.src_uri}: knowledge blocks cannot contain other directive blocks")
         return (f'<section class="knowledge-block" data-knowledge-tags="{escape(",".join(tags))}" markdown="1">\n\n'
-                f'{match.group("content").strip()}\n\n</section>')
+                '<button class="knowledge-reveal" type="button" hidden>Show explanation</button>\n\n'
+                '<div class="knowledge-content" markdown="1">\n\n'
+                f'{match.group("content").strip()}\n\n</div>\n\n</section>')
 
     markdown = KNOWLEDGE.sub(knowledge, markdown)
     if re.search(r'^:::\s*knowledge\b', markdown, re.MULTILINE):

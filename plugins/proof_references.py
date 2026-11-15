@@ -11,7 +11,7 @@ from mkdocs.exceptions import PluginError
 
 
 BLOCK = re.compile(
-    r'^:::\s*proof-ref\s+id="(?P<id>[a-z][a-z0-9-]*)"(?:\s+type="(?P<type>lemma|theorem|proposition)")?\s*\n'
+    r'^:::\s*proof-ref\s+id="(?P<id>[a-z][a-z0-9-]*)"(?:\s+type="(?P<type>lemma|theorem|proposition|definition|corollary|remark|example)")?\s*\n'
     r'(?P<content>.*?)^:::\s*$',
     re.MULTILINE | re.DOTALL,
 )
