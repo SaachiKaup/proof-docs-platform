@@ -1,7 +1,10 @@
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from types import SimpleNamespace
+import json
+import tempfile
 import unittest
+from unittest.mock import patch
 from mkdocs.exceptions import PluginError
 
 ROOT = Path(__file__).parents[1]
@@ -15,6 +18,18 @@ PAGE = SimpleNamespace(file=SimpleNamespace(src_uri="sample.md"))
 
 
 class KnowledgeTests(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        root = Path(directory.name)
+        (root / "topics.json").write_text(json.dumps([
+            {"id": "algebra", "label": "Algebra"},
+            {"id": "number-theory", "label": "Number theory"},
+        ]))
+        change = patch.object(plugin, "ROOT", root)
+        change.start()
+        self.addCleanup(change.stop)
+
     def test_multi_topic_block_has_metadata_and_visible_contents(self):
         text = '::: knowledge tags="algebra,number-theory"\nExample $x^2$.\n:::\n'
         result = plugin.on_page_markdown(text, page=PAGE, config={}, files=[])

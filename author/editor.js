@@ -61,9 +61,11 @@
   }
   async function addTopic(event) {
     event.preventDefault();
-    const form = event.currentTarget, id = $("topic-id").value.trim(), label = $("topic-name").value.trim();
+    const form = event.currentTarget, label = $("topic-name").value.trim();
+    const id = $("topic-id").value.trim() || label.toLowerCase().replace(/\s+/g, "-");
     if (topicBusy || saving) return;
-    if (!label || !/^[a-z][a-z0-9-]*$/.test(id) || topics.some((t) => t.id === id)) return message("Enter a unique lowercase topic ID and a name.", true);
+    if (!label || !/^[a-z][a-z0-9-]*$/.test(id)) return message("Enter a topic name or ID using letters, numbers, spaces, and hyphens; the ID must start with a letter.", true);
+    if (topics.some((t) => t.id === id)) return message(`Topic ID '${id}' already exists. Choose a different ID.`, true);
     topicBusy = true;
     try {
       const topic = {id, label};
