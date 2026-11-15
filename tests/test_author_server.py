@@ -49,6 +49,50 @@ class AuthorServerTests(unittest.TestCase):
         self.assertEqual(json.loads(page["body"])["content"], "# Example\n")
         self.assertEqual(request("GET", "/api/page/../topics.json")["status"], "400 Bad Request")
 
+    def test_missing_topics_requires_setup_and_can_be_initialized(self):
+        (self.root / "topics.json").unlink()
+        project = json.loads(request("GET", "/api/project")["body"])
+        self.assertTrue(project["needs_topic_setup"])
+        topics = [{"id": "topology", "label": "Topology"}]
+        response = request("POST", "/api/topics/initialize", {"topics": topics})
+        self.assertEqual(response["status"], "200 OK")
+        project = json.loads(request("GET", "/api/project")["body"])
+        self.assertFalse(project["needs_topic_setup"])
+        self.assertEqual(project["topics"], topics)
+
+    def test_initialization_rejects_invalid_and_existing_catalog(self):
+        old = (self.root / "topics.json").read_text()
+        response = request("POST", "/api/topics/initialize", {"topics": []})
+        self.assertEqual(response["status"], "400 Bad Request")
+        self.assertEqual((self.root / "topics.json").read_text(), old)
+        (self.root / "topics.json").unlink()
+        invalid = [{"id": "Bad ID", "label": "Bad"}]
+        response = request("POST", "/api/topics/initialize", {"topics": invalid})
+        self.assertEqual(response["status"], "400 Bad Request")
+        self.assertFalse((self.root / "topics.json").exists())
+
+    def test_empty_initial_topic_catalog_is_allowed(self):
+        (self.root / "topics.json").unlink()
+        response = request("POST", "/api/topics/initialize", {"topics": []})
+        self.assertEqual(response["status"], "200 OK")
+        self.assertEqual(json.loads((self.root / "topics.json").read_text()), [])
+
+    def test_adding_topic_saves_it_immediately(self):
+        topic = {"id": "topology", "label": "Topology"}
+        response = request("POST", "/api/topics/add", {"topic": topic})
+        self.assertEqual(response["status"], "200 OK")
+        self.assertIn(topic, json.loads((self.root / "topics.json").read_text()))
+        self.assertEqual(request("POST", "/api/topics/add", {"topic": topic})["status"], "400 Bad Request")
+
+    def test_adding_topic_creates_missing_catalog_during_setup(self):
+        (self.root / "topics.json").unlink()
+        topic = {"id": "topology", "label": "Topology"}
+        response = request("POST", "/api/topics/add", {"topic": topic})
+        self.assertEqual(response["status"], "200 OK")
+        self.assertEqual(json.loads((self.root / "topics.json").read_text()), [topic])
+        request("POST", "/api/topics/remove", {"topic": topic})
+        self.assertEqual(json.loads((self.root / "topics.json").read_text()), [])
+
     @patch.object(server, "prepare_preview", return_value="/preview/")
     def test_preview_and_save_routes(self, build):
         payload = {"page": "new-page.md", "content": "# New\n", "topics": [{"id": "algebra", "label": "Algebra"}]}

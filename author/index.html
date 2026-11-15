@@ -7,7 +7,15 @@
   <link rel="stylesheet" href="/editor.css">
 </head>
 <body>
-  <main class="workspace">
+  <main id="topic-setup" class="setup" hidden>
+    <h1>Topics</h1>
+    <p>Add topics for optional explanations. You can change them later.</p>
+    <div id="setup-fields"></div>
+    <p id="setup-status" role="status" aria-live="polite"></p>
+    <button id="setup-continue" class="setup-continue" type="button">Continue to editor</button>
+    <p class="setup-hint">Existing tagged pages need matching topic IDs.</p>
+  </main>
+  <main id="editor-workspace" class="workspace" hidden>
     <nav class="toolbar" aria-label="Document controls">
       <select id="pages" aria-label="Documentation page"></select>
       <button id="new-page" class="quiet" type="button">New page</button>
@@ -16,7 +24,7 @@
     </nav>
     <details class="topic-settings">
       <summary>Topics</summary>
-      <div class="topic-content">
+      <div id="topic-content" class="topic-content">
         <div id="topics"></div>
         <form id="add-topic">
           <label>Topic name <input id="topic-name" required></label>

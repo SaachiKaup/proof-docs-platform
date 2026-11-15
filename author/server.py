@@ -55,7 +55,9 @@ def validate_topics(topics):
         raise ValueError("Topics must be a list")
     seen = set()
     for topic in topics:
-        if not isinstance(topic, dict) or not ID.fullmatch(topic.get("id", "")) or not isinstance(topic.get("label"), str) or not topic["label"].strip() or topic["id"] in seen:
+        if (not isinstance(topic, dict) or not isinstance(topic.get("id"), str)
+                or not ID.fullmatch(topic["id"]) or not isinstance(topic.get("label"), str)
+                or not topic["label"].strip() or topic["id"] in seen):
             raise ValueError("Each topic needs a unique lowercase ID and a non-empty label.")
         seen.add(topic["id"])
     return topics
@@ -86,10 +88,45 @@ def prepare_preview(page, content, topics):
 
 
 def project_data():
+    pages = sorted(str(path.relative_to(DOCS)) for path in DOCS.rglob("*.md"))
+    try:
+        topics = json.loads(TOPICS.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {"needs_topic_setup": True, "topics": [], "pages": pages}
     return {
-        "topics": json.loads(TOPICS.read_text(encoding="utf-8")),
-        "pages": sorted(str(path.relative_to(DOCS)) for path in DOCS.rglob("*.md")),
+        "needs_topic_setup": False,
+        "topics": validate_topics(topics),
+        "pages": pages,
     }
+
+
+def initialize_topics(topics):
+    """Create the initial topic catalog without overwriting an existing one."""
+    validate_topics(topics)
+    try:
+        with TOPICS.open("x", encoding="utf-8") as file:
+            json.dump(topics, file, indent=2, ensure_ascii=False)
+            file.write("\n")
+    except FileExistsError as error:
+        raise ValueError("Topics already exist. Reload the editor to continue.") from error
+    return {"ok": True}
+
+
+def update_topics(topic, *, remove=False):
+    """Persist a single topic without overwriting unrelated catalog entries."""
+    try:
+        existing = validate_topics(json.loads(TOPICS.read_text(encoding="utf-8")))
+    except FileNotFoundError:
+        existing = []
+    if remove:
+        topics = [item for item in existing if item["id"] != topic["id"]]
+    else:
+        topics = validate_topics([*existing, topic])
+    if not TOPICS.exists():
+        initialize_topics(topics)
+    else:
+        TOPICS.write_text(json.dumps(topics, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return {"topics": topics}
 
 
 def save_page(data):
@@ -145,9 +182,13 @@ def route_request(environ):
         if path.startswith("/api/page/"):
             return json_response({"content": page_path(path.removeprefix("/api/page/")).read_text(encoding="utf-8")})
         return static_response(path)
-    if method == "POST" and path in ("/api/preview", "/api/save"):
+    if method == "POST" and path in ("/api/preview", "/api/save", "/api/topics/initialize", "/api/topics/add", "/api/topics/remove"):
         data = read_request_json(environ)
         with BUILD_LOCK:
+            if path == "/api/topics/initialize":
+                return json_response(initialize_topics(data["topics"]))
+            if path in ("/api/topics/add", "/api/topics/remove"):
+                return json_response(update_topics(data["topic"], remove=path.endswith("/remove")))
             if path == "/api/preview":
                 return json_response({"url": prepare_preview(data["page"], data["content"], data["topics"])})
             return json_response(save_page(data))
