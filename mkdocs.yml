@@ -33,5 +33,5 @@ extra_javascript:
 - javascripts/reference-panel.js
 - javascripts/topic-switch.js
 hooks:
-- plugins/knowledge.py
+- plugins/topic_checker.py
 - plugins/proof_references.py

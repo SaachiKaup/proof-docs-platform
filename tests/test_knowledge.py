@@ -5,7 +5,7 @@ import unittest
 from mkdocs.exceptions import PluginError
 
 ROOT = Path(__file__).parents[1]
-spec = spec_from_file_location("knowledge", ROOT / "plugins/knowledge.py")
+spec = spec_from_file_location("topic_checker", ROOT / "plugins/topic_checker.py")
 plugin = module_from_spec(spec)
 spec.loader.exec_module(plugin)
 reference_spec = spec_from_file_location("proof_references", ROOT / "plugins/proof_references.py")
