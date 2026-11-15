@@ -59,6 +59,14 @@
     const project = await api("/api/project"); topics = project.topics; savedTopics = JSON.stringify(topics); renderTopics();
     $("pages").value = page; preview();
   }
+  function restoreTopic(topic, previous) {
+    const index = previous.findIndex((item) => item.id === topic.id);
+    if (index < 0) return false;
+    const next = previous.slice(index + 1).find((item) => topics.some((current) => current.id === item.id));
+    const position = next ? topics.findIndex((item) => item.id === next.id) : topics.length;
+    topics = [...topics.slice(0, position), topic, ...topics.slice(position)];
+    return true;
+  }
   async function addTopic(event) {
     event.preventDefault();
     const form = event.currentTarget, label = $("topic-name").value.trim();
@@ -66,11 +74,14 @@
     if (topicBusy || saving) return;
     if (!label || !/^[a-z][a-z0-9-]*$/.test(id)) return message("Enter a topic name or ID using letters, numbers, spaces, and hyphens; the ID must start with a letter.", true);
     if (topics.some((t) => t.id === id)) return message(`Topic ID '${id}' already exists. Choose a different ID.`, true);
+    const topic = {id, label}, previous = savedTopics ? JSON.parse(savedTopics) : [];
+    if (restoreTopic(topic, previous)) {
+      form.reset(); message(""); renderTopics(); schedule();
+      return;
+    }
     topicBusy = true;
     try {
-      const topic = {id, label};
       const result = await api("/api/topics/add", {topic});
-      const previous = savedTopics ? JSON.parse(savedTopics) : [];
       const removed = new Set(previous.filter((item) => !topics.some((current) => current.id === item.id)).map((item) => item.id));
       topics = result.topics.filter((item) => !removed.has(item.id));
       savedTopics = JSON.stringify(result.topics);

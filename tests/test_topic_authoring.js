@@ -19,7 +19,9 @@ const savedTopics = [];
 const fetch = async (url, options) => {
   if (url === "/api/project") return {ok: true, json: async () => ({needs_topic_setup: false, topics: [...savedTopics], pages: []})};
   if (url === "/api/topics/add") {
-    savedTopics.push(JSON.parse(options.body).topic);
+    const topic = JSON.parse(options.body).topic;
+    if (savedTopics.some((item) => item.id === topic.id)) return {ok: false, json: async () => ({error: "Duplicate topic"})};
+    savedTopics.push(topic);
     return {ok: true, json: async () => ({topics: [...savedTopics]})};
   }
   throw Error(`Unexpected request: ${url}`);
@@ -40,6 +42,15 @@ async function add(name, id = "") {
   assert.deepEqual(savedTopics[0], {id: "number-theory", label: "Number   Theory"});
   await add("Abstract Algebra", "algebra-2");
   assert.deepEqual(savedTopics[1], {id: "algebra-2", label: "Abstract Algebra"});
+  await elements.topics.children[0].children[1].onclick();
+  assert.equal(elements.topics.children.length, 1);
+  await add("Number   Theory");
+  assert.equal(elements.topics.children.length, 2);
+  assert.match(elements.topics.children[0].children[0].textContent, /Number   Theory/);
+  assert.equal(savedTopics.length, 2);
+  await elements.topics.children[0].children[1].onclick();
+  await add("Number Theory", "number-theory");
+  assert.match(elements.topics.children[0].children[0].textContent, /Number Theory/);
   await add("Number Theory");
   assert.match(elements.status.textContent, /already exists/);
   await add("2 Categories");
