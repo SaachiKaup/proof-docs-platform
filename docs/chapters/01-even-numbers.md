@@ -10,6 +10,16 @@ An integer $n$ is **even** when there is an integer $k$ such that $n = 2k$.
 The integer $k$ is a witness to the claim that $n$ is even.
 :::
 
+::: knowledge tags="definitions"
+This definition says that an even integer can be grouped into pairs with
+no remainder.
+:::
+
+::: knowledge tags="algebra,number-theory"
+Multiplying an integer by two always produces an even integer; squaring
+an even integer produces another multiple of two.
+:::
+
 ::: proof-ref id="lemma-even-square"
 ## Lemma 1.2: Squaring preserves evenness
 
@@ -21,7 +31,7 @@ $$
 n^2 = (2k)^2 = 4k^2 = 2(2k^2).
 $$
 
-Since $2k^2$ is an integer, $n^2$ is even. $\square$
+Since $2k^2$ is an integer, $n^2$ is even.
 :::
 
 ::: proof-ref id="theorem-even-sum"
@@ -35,7 +45,7 @@ $$
 a^2 + b^2 = 2r + 2s = 2(r+s),
 $$
 
-and $r+s$ is an integer. So $a^2 + b^2$ is even. $\square$
+and $r+s$ is an integer. So $a^2 + b^2$ is even.
 
 The underlying algebra is the distributive law, stated in [OpenStax's elementary algebra text](https://openstax.org/books/elementary-algebra-2e/pages/1-6-the-commutative-and-associative-properties).
 
