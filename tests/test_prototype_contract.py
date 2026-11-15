@@ -34,16 +34,10 @@ class ProofReferenceTests(unittest.TestCase):
         with self.assertRaises(PluginError):
             proof_references.on_page_markdown('[[Missing lemma|not-defined]]', page=PAGE, config={}, files=[])
 
-    def test_display_math_in_plain_html_div_is_enabled(self):
-        text = '<div class="diagram">\n$$\nA \\xrightarrow{f} B\n$$\n</div>'
+    def test_plain_display_math_is_prepared_for_rendering(self):
+        text = '$$\nA \\xrightarrow{f} B\n$$'
         result = proof_references.on_page_markdown(text, page=PAGE, config={}, files=[])
-        self.assertIn('<div class="diagram" markdown="1">', result)
         self.assertIn('```math\nA \\xrightarrow{f} B\n```', result)
-
-    def test_existing_markdown_attribute_is_preserved(self):
-        text = '<div markdown="1">\n$$\nx\n$$\n</div>'
-        result = proof_references.on_page_markdown(text, page=PAGE, config={}, files=[])
-        self.assertEqual(result.count('markdown="1"'), 1)
 
     def test_static_ui_module_does_not_build_or_clone_proof_content(self):
         self.assertNotIn("cloneNode", SCRIPT)

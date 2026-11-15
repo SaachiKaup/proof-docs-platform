@@ -5,9 +5,12 @@ import unittest
 from mkdocs.exceptions import PluginError
 
 ROOT = Path(__file__).parents[1]
-spec = spec_from_file_location("proof_references_knowledge", ROOT / "plugins/proof_references.py")
+spec = spec_from_file_location("knowledge", ROOT / "plugins/knowledge.py")
 plugin = module_from_spec(spec)
 spec.loader.exec_module(plugin)
+reference_spec = spec_from_file_location("proof_references", ROOT / "plugins/proof_references.py")
+references = module_from_spec(reference_spec)
+reference_spec.loader.exec_module(references)
 PAGE = SimpleNamespace(file=SimpleNamespace(src_uri="sample.md"))
 
 
@@ -27,6 +30,7 @@ class KnowledgeTests(unittest.TestCase):
     def test_nested_knowledge_inside_reference_is_processed(self):
         text = '::: proof-ref id="lemma"\n## Lemma\n\n::: knowledge tags="algebra"\nExtra.\n:::\n\n:::\n'
         result = plugin.on_page_markdown(text, page=PAGE, config={}, files=[])
+        result = references.on_page_markdown(result, page=PAGE, config={}, files=[])
         self.assertIn('class="reference-source"', result)
         self.assertIn('class="knowledge-block"', result)
         self.assertNotIn('::: knowledge', result)
