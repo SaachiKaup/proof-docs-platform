@@ -36,9 +36,17 @@ Start the local editor:
 
 Open <http://127.0.0.1:8765/>. Choose or create a page, write Markdown, and
 use **Topics** to manage the shared topic list. The preview is built from your
-current draft; click **Save** to write changes to the project. Drag the divider
+current draft; added topics are saved immediately, while page edits and topic
+removals require **Save**. Drag the divider
 to resize the panes, or open the preview in a new tab. Stop the server with
 `Ctrl+C`.
+
+The topic ID is optional: leaving it blank generates one from the topic name,
+such as `number-theory` for “Number Theory”. Enter an ID to override it.
+
+If `topics.json` is missing, the editor first offers a setup screen to create
+the topic list. You can start with an empty list and add topics later. If the
+file already exists, the editor opens directly and uses that list.
 
 The editor server is for local authoring, not public hosting. A preview is a
 temporary site built from the draft; it is not the final published site.
@@ -89,7 +97,7 @@ contain another directive block.
 | `topics.json` | Topic IDs and names shared across the site. |
 | `author/` | The local editing interface, server, saving, and temporary previews. |
 | `mkdocs.yml` | Site navigation, theme, Markdown extensions, and build configuration. |
-| `plugins/knowledge.py` | Validates topic tags and builds the reader's topic selector. |
+| `plugins/topic_checker.py` | Validates topic tags and builds the reader's topic selector. |
 | `plugins/proof_references.py` | Builds reference cards and prepares math for KaTeX. |
 | `docs/javascripts/` | Reader-side topic filtering and reference-card interaction. |
 | `docs/stylesheets/` | Presentation of the generated reader site. |
@@ -105,10 +113,11 @@ Math is rendered during the build using KaTeX, installed through npm.
 ```sh
 .venv/bin/python -m unittest discover -s tests -v
 node tests/test_knowledge_ui.js
+node tests/test_topic_authoring.js
 node --check author/editor.js
 node --check author/pane-resize.js
 node --check docs/javascripts/reference-panel.js
-node --check docs/javascripts/knowledge.js
+node --check docs/javascripts/topic-switch.js
 .venv/bin/python -m mkdocs build --strict
 ```
 
