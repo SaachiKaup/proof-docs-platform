@@ -35,11 +35,11 @@ Start the local editor:
 ```
 
 Open <http://127.0.0.1:8765/>. Choose or create a page, write Markdown, and
-use **Topics** to manage the shared topic list. The preview is built from your
-current draft; added topics are saved immediately, while page edits and topic
-removals require **Save**. Drag the divider
-to resize the panes, or open the preview in a new tab. Stop the server with
-`Ctrl+C`.
+use **Topics** to manage the shared topic list. A preview appears when a page
+opens; click **Update preview** to refresh it after editing. Added topics are
+saved immediately, while page edits and topic removals require **Save**. After
+a successful save, **Open saved site** opens that saved page in a new tab.
+Drag the divider to resize the panes. Stop the server with `Ctrl+C`.
 
 The topic ID is optional: leaving it blank generates one from the topic name,
 such as `number-theory` for “Number Theory”. Enter an ID to override it.
@@ -48,8 +48,9 @@ If `topics.json` is missing, the editor first offers a setup screen to create
 the topic list. You can start with an empty list and add topics later. If the
 file already exists, the editor opens directly and uses that list.
 
-The editor server is for local authoring, not public hosting. A preview is a
-temporary site built from the draft; it is not the final published site.
+The editor server is for local authoring, not public hosting. The preview is
+built from the draft; the saved-site button opens a separate local copy of the
+last saved version. Both are available only while the editor server is running.
 
 ## Write a proof
 
@@ -114,6 +115,8 @@ Math is rendered during the build using KaTeX, installed through npm.
 .venv/bin/python -m unittest discover -s tests -v
 node tests/test_knowledge_ui.js
 node tests/test_topic_authoring.js
+node tests/test_line_numbers.js
+node tests/test_manual_preview.js
 node --check author/editor.js
 node --check author/pane-resize.js
 node --check docs/javascripts/reference-panel.js
