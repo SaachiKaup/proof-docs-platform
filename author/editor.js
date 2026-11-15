@@ -55,7 +55,7 @@
     if (topicBusy || saving) { $("pages").value = page; return message("Wait for the current operation to finish."); }
     if (dirty() && !confirm("Discard unsaved changes?")) { $("pages").value = page; return; }
     revision++; disablePreviewLink();
-    const result = await api("/api/page/" + name); page = name; editor.value = result.content; saved = result.content;
+    const result = await api("/api/page/" + name); page = name; editor.value = result.content; saved = result.content; window.updateEditorLineNumbers?.();
     const project = await api("/api/project"); topics = project.topics; savedTopics = JSON.stringify(topics); renderTopics();
     $("pages").value = page; preview();
   }
@@ -93,7 +93,7 @@
   $("add-topic").onsubmit = addTopic;
   $("save").onclick = async () => { if (busy || topicBusy || saving) return message("Wait for the current operation to finish before saving."); saving = true; const snapshot = {page, content: editor.value, topics: JSON.parse(JSON.stringify(topics))}; try { await api("/api/save", snapshot); if (page === snapshot.page) { saved = snapshot.content; savedTopics = JSON.stringify(snapshot.topics); } const project = await api("/api/project"); updatePages(project.pages); $("pages").value = page; message(dirty() ? "Saved previous version; newer changes are not saved." : "Saved."); } catch (error) { $("frame").src = "about:blank"; disablePreviewLink(); message("Save failed: " + error.message, true); } finally { saving = false; } };
   $("pages").onchange = (event) => openPage(event.target.value).catch((error) => { $("frame").src = "about:blank"; message(error.message, true); });
-  $("new-page").onclick = () => { if (topicBusy || saving) return message("Wait for the current operation to finish."); if (dirty() && !confirm("Discard unsaved changes?")) return; const name = prompt("New page path, for example chapters/my-proof.md"); if (!name) return; if (!/^[a-z0-9][a-z0-9-]*(\/[a-z0-9][a-z0-9-]*)*\.md$/.test(name)) return message("Use a lowercase Markdown path such as chapters/my-proof.md."); if ([...$("pages").options].some((o) => o.value === name)) return message("That page already exists."); page = name; editor.value = "# New proof\n"; saved = ""; const option = new Option(name, name); $("pages").add(option); $("pages").value = name; revision++; disablePreviewLink(); preview(); };
+  $("new-page").onclick = () => { if (topicBusy || saving) return message("Wait for the current operation to finish."); if (dirty() && !confirm("Discard unsaved changes?")) return; const name = prompt("New page path, for example chapters/my-proof.md"); if (!name) return; if (!/^[a-z0-9][a-z0-9-]*(\/[a-z0-9][a-z0-9-]*)*\.md$/.test(name)) return message("Use a lowercase Markdown path such as chapters/my-proof.md."); if ([...$("pages").options].some((o) => o.value === name)) return message("That page already exists."); page = name; editor.value = "# New proof\n"; window.updateEditorLineNumbers?.(); saved = ""; const option = new Option(name, name); $("pages").add(option); $("pages").value = name; revision++; disablePreviewLink(); preview(); };
   editor.addEventListener("input", schedule);
   window.addEventListener("beforeunload", (event) => { if (dirty()) { event.preventDefault(); event.returnValue = ""; } });
   function updatePages(pages) { $("pages").replaceChildren(...pages.map((name) => new Option(name, name))); }

@@ -42,7 +42,10 @@
     <div class="panes">
       <section class="pane" id="writing-pane">
         <label class="pane-label" for="editor">Write <span>Markdown + LaTeX</span></label>
-        <textarea id="editor" spellcheck="false"></textarea>
+        <div class="editor-surface">
+          <pre id="line-numbers" class="line-numbers" aria-hidden="true">1</pre>
+          <textarea id="editor" spellcheck="false" wrap="off"></textarea>
+        </div>
       </section>
       <div id="pane-divider" class="pane-divider" role="separator" tabindex="0" aria-label="Resize writing and preview panes" aria-controls="writing-pane" aria-orientation="vertical" aria-valuemin="20" aria-valuemax="80" aria-valuenow="50" title="Drag to resize panes; use arrow keys to adjust"></div>
       <section class="pane">
@@ -58,6 +61,7 @@
     </div>
     </div>
   </main>
+  <script src="/line-numbers.js"></script>
   <script src="/editor.js"></script>
   <script src="/pane-resize.js"></script>
 </body>
