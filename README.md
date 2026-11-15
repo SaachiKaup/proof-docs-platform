@@ -1,9 +1,47 @@
 # Proof Notes POC
 
+## Authoring interface and topic filtering
+
+Start the local editor from this directory:
+
+```sh
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+npm install
+.venv/bin/python author_server.py
+```
+
+Open <http://127.0.0.1:8765/>. Select a page and write Markdown. Expand
+**Topics** to add or remove topics, and mark optional explanations directly
+in the Markdown using the notation below. Save explicitly; the preview builds
+from the current unsaved draft. The editor runs locally and is not a public
+server.
+
+For direct Markdown editing, the underlying notation is:
+
+```md
+::: knowledge tags="algebra,number-theory"
+Optional background written in Markdown and $x^2$ mathematics.
+:::
+```
+
+The allowed topics live in `topics.json`. Unknown topics fail the build.
+Select **all** of a passage's topics in the reader view to hide it; changing
+the selection restores it. A reader's selections are saved in their browser.
+Untagged content and all content when JavaScript is disabled remain visible.
+Keep essential proof steps outside optional passages. Knowledge blocks can
+occur inside `proof-ref` blocks, but cannot contain another directive block.
+
+Run the filtering check with `node tests/test_knowledge_ui.js` alongside the
+existing verification commands below.
+
 A small, shareable documentation site for mathematical proofs. It uses a clean
 book-like layout: navigation is on the left, the proof stays in the centre, and
 an earlier definition or lemma can be opened in a closeable card on the right.
 The reader does not lose their place in the proof.
+
+For the full project rationale and operating notes, see
+[`explanations/architecture-and-decisions.md`](explanations/architecture-and-decisions.md).
 
 ## Run locally
 
