@@ -108,8 +108,9 @@ The distributive law gives $2(a+b) = 2a + 2b$.
 :::
 ```
 
-With multiple comma-separated tags, the explanation hides only when the reader
-selects *all* of them. Keep essential proof steps outside these blocks. Topic
+With multiple comma-separated tags, the explanation collapses only when the
+reader selects *all* of them. A **Show explanation** control stays visible so
+readers can expand it anyway. Keep essential proof steps outside these blocks. Topic
 IDs must exist in `topics.json`; unknown or repeated tags cause a build error.
 A knowledge block cannot contain another directive block.
 

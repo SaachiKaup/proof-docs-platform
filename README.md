@@ -1,10 +1,11 @@
 # Proof Notes
 
-Proof Notes is a small documentation site for mathematical proofs. An author
-writes a proof in Markdown and marks optional explanations by topic. Readers
-choose topics they already understand, and matching explanations collapse
-behind a **Show explanation** control. Definitions and lemmas can also open in
-reference cards beside the proof.
+Proof Notes is an authoring and reading platform for mathematical documents.
+It addresses a common reading problem: some readers need background that
+others already know, and following references can interrupt a proof. Authors
+tag optional explanations by topic; readers select what they already
+understand. Matching explanations collapse behind **Show explanation**.
+Definitions and lemmas can open in reference cards beside the proof.
 
 ```text
 Author writes Markdown + topic labels
@@ -94,6 +95,9 @@ converts this to the same `::: knowledge` block used in Markdown, including the
 reader's **Show explanation** control when its tags are selected. Add a
 matching `knowledge` environment definition to the TeX preamble if compiling
 the source to PDF as well.
+
+The current editor and site use Markdown and MkDocs. Integrating these authoring
+features with Verso is a future direction.
 
 ### Edit a page
 
