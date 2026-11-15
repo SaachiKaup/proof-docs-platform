@@ -2,7 +2,7 @@ import importlib.util
 from pathlib import Path
 import unittest
 
-spec = importlib.util.spec_from_file_location("author_server", Path(__file__).parents[1] / "author_server.py")
+spec = importlib.util.spec_from_file_location("author_server", Path(__file__).parents[1] / "author" / "server.py")
 author_server = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(author_server)
 

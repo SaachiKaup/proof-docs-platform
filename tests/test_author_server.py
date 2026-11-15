@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 from wsgiref.util import setup_testing_defaults
 
-import author_server as server
+from author import server
 
 
 def request(method, path, data=None, origin=None):
