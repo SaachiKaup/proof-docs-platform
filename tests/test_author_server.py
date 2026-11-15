@@ -35,8 +35,11 @@ class AuthorServerTests(unittest.TestCase):
         (docs / "index.md").write_text("# Example\n")
         (root / "topics.json").write_text('[{"id":"algebra","label":"Algebra"}]')
         (root / "mkdocs.yml").write_text("nav:\n  - Home: index.md\n")
+        site = root / "preview-site"
+        (site / "new-page").mkdir(parents=True)
+        (site / "new-page" / "index.html").write_text("Saved page")
         self.root, self.docs = root, docs
-        for name, value in (("ROOT", root), ("DOCS", docs), ("TOPICS", root / "topics.json")):
+        for name, value in (("ROOT", root), ("DOCS", docs), ("TOPICS", root / "topics.json"), ("SITE", site), ("SAVED_SITE", root / "saved-site")):
             change = patch.object(server, name, value)
             change.start()
             self.addCleanup(change.stop)
@@ -100,10 +103,12 @@ class AuthorServerTests(unittest.TestCase):
         self.assertEqual(json.loads(preview["body"]), {"url": "/preview/"})
         self.assertFalse((self.docs / "new-page.md").exists())
         saved = request("POST", "/api/save", payload)
-        self.assertEqual(json.loads(saved["body"]), {"ok": True})
+        self.assertEqual(json.loads(saved["body"]), {"ok": True, "site_url": "/site/new-page/"})
         self.assertEqual((self.docs / "new-page.md").read_text(), "# New\n")
         self.assertIn("new-page.md", (self.root / "mkdocs.yml").read_text())
         self.assertEqual(build.call_count, 2)
+        (self.root / "preview-site" / "new-page" / "index.html").write_text("Unsaved preview")
+        self.assertEqual(request("GET", "/site/new-page/")["body"], b"Saved page")
 
     @patch.object(server, "prepare_preview", side_effect=ValueError("Invalid proof"))
     def test_failed_build_does_not_save(self, _build):

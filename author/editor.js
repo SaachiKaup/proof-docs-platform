@@ -2,7 +2,7 @@
   "use strict";
   const $ = (id) => document.getElementById(id);
   const editor = $("editor"), status = $("status");
-  let topics = [], page = "", saved = "", savedTopics = "", timer, busy = false, pending = false, revision = 0;
+  let topics = [], page = "", saved = "", savedTopics = "", busy = false, revision = 0, pendingInitial = null;
   let topicBusy = false, saving = false, setupCreated = false;
   const dirty = () => editor.value !== saved || JSON.stringify(topics) !== savedTopics;
   const message = (text, isError = false) => { const target = $("topic-setup").hidden ? status : $("setup-status"); target.textContent = text; target.classList.toggle("error", isError); };
@@ -35,10 +35,14 @@
       row.append(text, remove); $("topics").append(row);
     });
   }
-  async function preview() {
+  async function preview(initial = false) {
     if (!page) return;
-    if (busy) { pending = true; return; }
-    busy = true; disablePreviewLink(); message("Updating…");
+    if (busy) {
+      if (initial === true) pendingInitial = revision;
+      else message("Wait for the current preview to finish.");
+      return;
+    }
+    busy = true; disablePreviewLink(); message("Building preview…");
     const currentRevision = revision;
     try {
       const result = await api("/api/preview", {page, content: editor.value, topics});
@@ -48,16 +52,21 @@
         message(dirty() ? "Unsaved changes" : "");
       }
     } catch (error) { if (currentRevision === revision) { $("frame").src = "about:blank"; disablePreviewLink(); message("Preview failed: " + error.message, true); } }
-    finally { busy = false; if (pending) { pending = false; preview(); } }
+    finally {
+      busy = false;
+      const next = pendingInitial;
+      pendingInitial = null;
+      if (next !== null && next === revision) preview(true);
+    }
   }
-  function schedule() { revision++; disablePreviewLink(); clearTimeout(timer); timer = setTimeout(preview, 900); }
+  function schedule() { revision++; disablePreviewLink(); if (page) message("Changes not previewed. Click Update preview to refresh."); }
   async function openPage(name) {
     if (topicBusy || saving) { $("pages").value = page; return message("Wait for the current operation to finish."); }
     if (dirty() && !confirm("Discard unsaved changes?")) { $("pages").value = page; return; }
-    revision++; disablePreviewLink();
+    revision++; disablePreviewLink(); $("open-site").hidden = true;
     const result = await api("/api/page/" + name); page = name; editor.value = result.content; saved = result.content; window.updateEditorLineNumbers?.();
     const project = await api("/api/project"); topics = project.topics; savedTopics = JSON.stringify(topics); renderTopics();
-    $("pages").value = page; preview();
+    $("pages").value = page; $("frame").src = "about:blank"; await preview(true);
   }
   function restoreTopic(topic, previous) {
     const index = previous.findIndex((item) => item.id === topic.id);
@@ -91,9 +100,30 @@
     finally { topicBusy = false; }
   }
   $("add-topic").onsubmit = addTopic;
-  $("save").onclick = async () => { if (busy || topicBusy || saving) return message("Wait for the current operation to finish before saving."); saving = true; const snapshot = {page, content: editor.value, topics: JSON.parse(JSON.stringify(topics))}; try { await api("/api/save", snapshot); if (page === snapshot.page) { saved = snapshot.content; savedTopics = JSON.stringify(snapshot.topics); } const project = await api("/api/project"); updatePages(project.pages); $("pages").value = page; message(dirty() ? "Saved previous version; newer changes are not saved." : "Saved."); } catch (error) { $("frame").src = "about:blank"; disablePreviewLink(); message("Save failed: " + error.message, true); } finally { saving = false; } };
+  $("save").onclick = async () => {
+    if (busy || topicBusy || saving) return message("Wait for the current operation to finish before saving.");
+    saving = true;
+    $("open-site").hidden = true;
+    const snapshot = {page, content: editor.value, topics: JSON.parse(JSON.stringify(topics))};
+    try {
+      const result = await api("/api/save", snapshot);
+      if (page === snapshot.page) {
+        saved = snapshot.content;
+        savedTopics = JSON.stringify(snapshot.topics);
+        $("open-site").href = result.site_url;
+        $("open-site").hidden = false;
+      }
+      const project = await api("/api/project");
+      updatePages(project.pages);
+      $("pages").value = page;
+      message(dirty() ? "Saved previous version; newer changes are not saved." : "Saved.");
+    } catch (error) {
+      $("frame").src = "about:blank"; disablePreviewLink(); message("Save failed: " + error.message, true);
+    } finally { saving = false; }
+  };
   $("pages").onchange = (event) => openPage(event.target.value).catch((error) => { $("frame").src = "about:blank"; message(error.message, true); });
-  $("new-page").onclick = () => { if (topicBusy || saving) return message("Wait for the current operation to finish."); if (dirty() && !confirm("Discard unsaved changes?")) return; const name = prompt("New page path, for example chapters/my-proof.md"); if (!name) return; if (!/^[a-z0-9][a-z0-9-]*(\/[a-z0-9][a-z0-9-]*)*\.md$/.test(name)) return message("Use a lowercase Markdown path such as chapters/my-proof.md."); if ([...$("pages").options].some((o) => o.value === name)) return message("That page already exists."); page = name; editor.value = "# New proof\n"; window.updateEditorLineNumbers?.(); saved = ""; const option = new Option(name, name); $("pages").add(option); $("pages").value = name; revision++; disablePreviewLink(); preview(); };
+  $("new-page").onclick = () => { if (topicBusy || saving) return message("Wait for the current operation to finish."); if (dirty() && !confirm("Discard unsaved changes?")) return; const name = prompt("New page path, for example chapters/my-proof.md"); if (!name) return; if (!/^[a-z0-9][a-z0-9-]*(\/[a-z0-9][a-z0-9-]*)*\.md$/.test(name)) return message("Use a lowercase Markdown path such as chapters/my-proof.md."); if ([...$("pages").options].some((o) => o.value === name)) return message("That page already exists."); page = name; editor.value = "# New proof\n"; window.updateEditorLineNumbers?.(); saved = ""; const option = new Option(name, name); $("pages").add(option); $("pages").value = name; revision++; disablePreviewLink(); $("open-site").hidden = true; $("frame").src = "about:blank"; preview(true); };
+  $("preview").onclick = () => preview();
   editor.addEventListener("input", schedule);
   window.addEventListener("beforeunload", (event) => { if (dirty()) { event.preventDefault(); event.returnValue = ""; } });
   function updatePages(pages) { $("pages").replaceChildren(...pages.map((name) => new Option(name, name))); }

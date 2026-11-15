@@ -12,7 +12,7 @@ class Element {
   reset() { elements["topic-name"].value = ""; elements["topic-id"].value = ""; }
 }
 
-const ids = ["editor", "status", "topic-setup", "setup-status", "open-preview", "topics", "pages", "frame", "topic-content", "setup-fields", "setup-continue", "topic-name", "topic-id", "add-topic", "save", "new-page", "editor-workspace"];
+const ids = ["editor", "status", "topic-setup", "setup-status", "open-preview", "open-site", "preview", "topics", "pages", "frame", "topic-content", "setup-fields", "setup-continue", "topic-name", "topic-id", "add-topic", "save", "new-page", "editor-workspace"];
 const elements = Object.fromEntries(ids.map((id) => [id, new Element()]));
 elements["topic-setup"].hidden = true;
 const savedTopics = [];

@@ -22,6 +22,7 @@ TOPICS = ROOT / "topics.json"
 TEMP = tempfile.TemporaryDirectory(prefix="proof-docs-editor-")
 STAGE = Path(TEMP.name) / "project"
 SITE = STAGE / "site"
+SAVED_SITE = Path(TEMP.name) / "saved-site"
 ID = re.compile(r"[a-z][a-z0-9-]*\Z")
 BUILD_LOCK = threading.Lock()
 MAX_REQUEST_BYTES = 2_000_000
@@ -143,7 +144,13 @@ def save_page(data):
         config = yaml.safe_load(config_path.read_text())
         config.setdefault("nav", []).append({data["page"]: data["page"]})
         config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
-    return {"ok": True}
+    # Keep the saved site separate from the draft preview, which is rebuilt
+    # as the author edits. Both live only for this local server session.
+    if SAVED_SITE.exists():
+        shutil.rmtree(SAVED_SITE)
+    shutil.copytree(SITE, SAVED_SITE)
+    page_url = "/site/" if data["page"] == "index.md" else "/site/" + data["page"][:-3] + "/"
+    return {"ok": True, "site_url": page_url}
 
 
 def json_response(value, status=HTTPStatus.OK):
@@ -151,9 +158,12 @@ def json_response(value, status=HTTPStatus.OK):
 
 
 def static_response(path):
-    is_preview = path.startswith("/preview/")
-    base = SITE if is_preview else ROOT / "author"
-    relative = path.removeprefix("/preview/") if is_preview else path.lstrip("/")
+    if path.startswith("/preview/"):
+        base, relative = SITE, path.removeprefix("/preview/")
+    elif path.startswith("/site/"):
+        base, relative = SAVED_SITE, path.removeprefix("/site/")
+    else:
+        base, relative = ROOT / "author", path.lstrip("/")
     file = (base / (relative or "index.html")).resolve()
     if file.is_dir():
         file = file / "index.html"
